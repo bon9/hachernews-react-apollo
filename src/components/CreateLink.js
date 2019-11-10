@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
+import { FEED_QUERY } from "./LinkList";
 
 const POST_MUTATION = gql`
   mutation PostMutation($description: String!, $url: String!) {
@@ -17,7 +18,15 @@ function CreateLink({ history }) {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [addPost] = useMutation(POST_MUTATION, {
-    onCompleted: () => history.push("/")
+    onCompleted: () => history.push("/"),
+    update: (cache, { data: { post } }) => {
+      const data = cache.readQuery({ query: FEED_QUERY });
+      data.feed.links.push(post);
+      cache.writeQuery({
+        query: FEED_QUERY,
+        data
+      });
+    }
   });
 
   return (
