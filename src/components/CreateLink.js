@@ -13,12 +13,12 @@ const POST_MUTATION = gql`
   }
 `;
 
-function CreateLink() {
+function CreateLink({ history }) {
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
-  const [addPost] = useMutation(POST_MUTATION);
-
-  const onAddPost = () => addPost({ variables: { description, url } });
+  const [addPost] = useMutation(POST_MUTATION, {
+    onCompleted: () => history.push("/")
+  });
 
   return (
     <div>
@@ -38,7 +38,9 @@ function CreateLink() {
           placeholder="The URL for the link"
         />
       </div>
-      <button onClick={onAddPost}>Submit</button>
+      <button onClick={() => addPost({ variables: { description, url } })}>
+        Submit
+      </button>
     </div>
   );
 }

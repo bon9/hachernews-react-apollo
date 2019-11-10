@@ -10,4 +10,4 @@ function Link({ link }) {
   );
 }
 
-export default Link;
+export default React.memo(Link);

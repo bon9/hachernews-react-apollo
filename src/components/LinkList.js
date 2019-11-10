@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 
@@ -18,11 +18,14 @@ const FEED_QUERY = gql`
 `;
 
 function LinkList() {
-  const { loading, error, data } = useQuery(FEED_QUERY);
+  const { loading, error, data, refetch } = useQuery(FEED_QUERY);
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
+
   if (loading) return <div>Fetching</div>;
   if (error) return <div>{error.message}</div>;
   const linksToRender = data.feed.links;
-
   return (
     <div>
       {linksToRender.map(link => (
