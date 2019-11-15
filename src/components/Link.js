@@ -36,7 +36,6 @@ function Link({ link, index, updateCacheAfterVote }) {
       <div className="flex items-center">
         <span className="gray">{index + 1}.</span>
         {authToken && (
-          // <div className="ml1 gray f11" onClick={() => _voteForLink()}>
           <div
             className="ml1 gray f11"
             onClick={() =>

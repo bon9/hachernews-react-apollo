@@ -40,7 +40,6 @@ function LinkList() {
     const votedLink = data.feed.links.find(link => link.id === linkId);
     // перезаписали votes на новые, пришедшие с ответа мутации
     votedLink.votes = createVote.link.votes;
-
     cache.writeQuery({ query: FEED_QUERY, data });
   };
 
