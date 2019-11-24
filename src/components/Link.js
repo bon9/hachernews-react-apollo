@@ -27,8 +27,8 @@ const VOTE_MUTATION = gql`
 function Link({ link, index, updateCacheAfterVote }) {
   const authToken = localStorage.getItem(AUTH_TOKEN);
   const [voteMutation] = useMutation(VOTE_MUTATION, {
-    update: (cache, { data: { vote } }) =>
-      updateCacheAfterVote(cache, vote, link.id)
+    update: (store, { data: { vote } }) =>
+      updateCacheAfterVote(store, vote, link.id)
   });
 
   return (
