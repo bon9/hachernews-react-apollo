@@ -78,14 +78,16 @@ const NEW_VOTES_SUBSCRIPTION = gql`
 `;
 
 function LinkList({ location, match, history }) {
+  const isNewPage = location.pathname.includes("new");
+  const page = parseInt(match.params.page, 10);
+
   const { loading, error, data, subscribeToMore } = useQuery(FEED_QUERY, {
-    variables: _getQueryVariables()
+    variables: getQueryVariables()
   });
   if (loading) return <div>Fetching</div>;
   if (error) return <div>{error.message}</div>;
 
   const _subscribeToNewLinks = subscribeToMore => {
-    console.log("_subscribeToNewLinks");
     subscribeToMore({
       document: NEW_LINKS_SUBSCRIPTION,
       updateQuery: (prev, { subscriptionData }) => {
@@ -106,14 +108,15 @@ function LinkList({ location, match, history }) {
   };
 
   const _subscribeToNewVotes = subscribeToMore => {
-    console.log("_subscribeToNewVotes");
     subscribeToMore({
       document: NEW_VOTES_SUBSCRIPTION
     });
   };
 
-  const _getLinksToRender = data => {
-    const isNewPage = location.pathname.includes("new");
+  _subscribeToNewLinks(subscribeToMore);
+  _subscribeToNewVotes(subscribeToMore);
+
+  const getLinksToRender = data => {
     if (isNewPage) {
       return data.feed.links;
     }
@@ -122,17 +125,15 @@ function LinkList({ location, match, history }) {
     return rankedLinks;
   };
 
-  function _getQueryVariables() {
-    const isNewPage = location.pathname.includes("new");
-    const page = parseInt(match.params.page, 10);
-    const skip = isNewPage ? (page - 1) * LINKS_PER_PAGE : 0;
-    const first = isNewPage ? LINKS_PER_PAGE : 100;
-    const orderBy = isNewPage ? "createdAt_DESC" : null;
-    return { first, skip, orderBy };
+  function getQueryVariables() {
+    return {
+      first: isNewPage ? LINKS_PER_PAGE : 100,
+      skip: isNewPage ? (page - 1) * LINKS_PER_PAGE : 0,
+      orderBy: isNewPage ? "createdAt_DESC" : null
+    };
   }
 
   const _nextPage = data => {
-    const page = parseInt(match.params.page, 10);
     if (page <= data.feed.count / LINKS_PER_PAGE) {
       const nextPage = page + 1;
       history.push(`/new/${nextPage}`);
@@ -140,32 +141,27 @@ function LinkList({ location, match, history }) {
   };
 
   const _previousPage = () => {
-    const page = parseInt(match.params.page, 10);
     if (page > 1) {
       const previousPage = page - 1;
       history.push(`/new/${previousPage}`);
     }
   };
 
-  const linksToRender = _getLinksToRender(data);
-  const isNewPage = location.pathname.includes("new");
   const pageIndex = match.params.page
     ? (match.params.page - 1) * LINKS_PER_PAGE
     : 0;
 
-  _subscribeToNewLinks(subscribeToMore);
-  _subscribeToNewVotes(subscribeToMore);
-
   const _updateCacheAfterVote = (store, createVote, linkId) => {
     const data = store.readQuery({
       query: FEED_QUERY,
-      variables: _getQueryVariables()
+      variables: getQueryVariables()
     });
-
     const votedLink = data.feed.links.find(link => link.id === linkId);
     votedLink.votes = createVote.link.votes;
     store.writeQuery({ query: FEED_QUERY, data });
   };
+
+  const linksToRender = getLinksToRender(data);
 
   return (
     <>
